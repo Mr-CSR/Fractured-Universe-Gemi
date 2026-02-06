@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GALACTIC AEGIS: ALPHA V1.0</title>
+    <style>
+        :root { --cyan: #00f2ff; --gold: #ffcc00; --red: #ff3c3c; --panel: rgba(5, 12, 22, 0.95); }
+        body, html { margin: 0; background: #000; color: var(--cyan); font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100%; }
+        canvas { display: block; }
+        .glass { background: var(--panel); border: 1px solid var(--cyan); backdrop-filter: blur(10px); pointer-events: all; }
+        #race-selector { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #ui-layer { position: absolute; inset: 0; pointer-events: none; display: none; }
+        #top-hud { position: absolute; top: 0; width: 100%; height: 70px; display: flex; align-items: center; justify-content: space-around; border-bottom: 2px solid var(--cyan); }
+        .side-module { position: absolute; top: 90px; width: 350px; height: 80vh; padding: 15px; }
+        #debug-hud { position: fixed; bottom: 10px; right: 10px; font-family: monospace; font-size: 10px; color: var(--gold); }
+        .bug-btn { position: fixed; bottom: 20px; left: 20px; background: var(--red); color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; font-weight: bold; pointer-events: all; }
+    </style>
+</head>
+<body>
+
+<div id="race-selector">
+    <h1>GALACTIC AEGIS: ALPHA</h1>
+    <button onclick="game.begin('Tarren')">TARREN</button>
+    <button onclick="game.begin('Korai')">KOR'AI</button>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="ui-layer">
+    <div id="top-hud" class="glass">
+        <div>METAL: <span id="m-val">--</span></div>
+        <div>HE3: <span id="h-val">--</span></div>
+        <div>POP: <span id="p-val">--</span></div>
+        <div>COORD: <span id="coord-val">--</span></div>
+    </div>
+    <aside class="side-module glass" style="left:20px;">
+        <h3>HANGAR</h3>
+        <div id="shipyard"></div>
+    </aside>
+</div>
+
+<button class="bug-btn" onclick="game.reportBug()">🐞 REPORT BUG</button>
+<div id="debug-hud">FPS: <span id="fps">--</span> | LATENCY: <span id="ping">--</span>ms</div>
+
+<script>
+class GalacticAegis {
+    constructor() {
+        this.player = { x: 500000, y: 500000, metal: 1000, pop: 0, he3: 500 };
+        this.socket = new WebSocket('ws://localhost:8080');
+        this.init();
+    }
+
+    init() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.socket.onmessage = (e) => console.log("Server:", JSON.parse(e.data));
+        this.loop();
+    }
+
+    begin(race) {
+        this.player.race = race;
+        document.getElementById('race-selector').style.display = 'none';
+        document.getElementById('ui-layer').style.display = 'block';
+    }
+
+    reportBug() {
+        const desc = prompt("Describe the glitch:");
+        if(desc) this.socket.send(JSON.stringify({ type: 'REPORT_BUG', playerId: this.player.id, description: desc }));
+    }
+
+    loop() {
+        this.ctx.fillStyle = "#000";
+        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
+        
+        // HUD Update
+        document.getElementById('m-val').innerText = Math.floor(this.player.metal += 0.05);
+        document.getElementById('coord-val').innerText = `${Math.floor(this.player.x)},${Math.floor(this.player.y)}`;
+        
+        requestAnimationFrame(() => this.loop());
+    }
+}
+const game = new GalacticAegis();
+</script>
+</body>
+</html>
