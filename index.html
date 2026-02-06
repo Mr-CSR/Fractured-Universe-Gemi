@@ -46,8 +46,10 @@
 class GalacticAegis {
     constructor() {
         this.player = { x: 500000, y: 500000, metal: 1000, pop: 0, he3: 500 };
-        this.socket = new WebSocket('ws://localhost:8080');
-        this.init();
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      this.serverUrl = isLocal ? 'ws://localhost:8080' : 'wss://fractured-universe-alpha.onrender.com';
+      this.socket = new WebSocket(this.serverUrl);
+      this.init();
     }
 
     init() {
@@ -84,4 +86,5 @@ class GalacticAegis {
 const game = new GalacticAegis();
 </script>
 </body>
+
 </html>
