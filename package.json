@@ -1,12 +1,15 @@
 {
-  "name": "galactic-aegis-server",
+  "name": "fractured-universe-server",
   "version": "1.0.0",
-  "description": "Backend for Galactic Aegis Alpha",
+  "description": "Multiplayer logic and Alpha reporting for Fractured Universe",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "ws": "^8.13.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
